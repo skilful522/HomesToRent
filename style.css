@@ -74,7 +74,12 @@ img {
 }
 .flat-more-description {
     cursor: pointer;
+    visibility: visible;
     color: cornflowerblue;
+}
+
+.hidden-flat-more-description {
+    visibility: hidden;
 }
 
 .rent-container {
@@ -113,7 +118,7 @@ img {
     height: 100%;
     width: 100%;
     overflow: auto;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .modal-content {

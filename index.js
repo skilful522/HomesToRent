@@ -9,10 +9,11 @@ showDefaultFlats();
 
 search.addEventListener('keydown', (event) => {
     if (event.keyCode === 13) {
-        let searchInput = search.value;
 
+        let searchInput = search.value;
+        console.log(searchInput);
         if (searchInput === '') {
-            searchInput = null;
+            searchInput = undefined;
         }
         createScript(searchInput);
         delContainers();
@@ -28,8 +29,8 @@ document.addEventListener('click', event => {
     if (flatMoreDescription) {
         if (event.target.innerText === flatMoreDescription.innerText) {
             const infoContainer = event.target.parentNode;
-            const flatContainer = infoContainer.parentNode;
-            console.log(flatContainer);
+
+            hideInscription();
             floatFullInfo.innerHTML = infoContainer.parentNode.innerHTML;
             modalWindow.style.display = 'block';
         } else if (event.target === favoritesListButton) {
@@ -39,17 +40,39 @@ document.addEventListener('click', event => {
 });
 
 closeBtn.addEventListener('click', () => {
+    const floatFullInfo = document.querySelector('#flat-full-info');
+    floatFullInfo.innerHTML = null;
     modalWindow.style.display = 'none';
+    showInscription();
 });
 
 document.addEventListener('click', (event) => {
+    const floatFullInfo = document.querySelector('#flat-full-info');
+
     if (event.target === modalWindow) {
+        floatFullInfo.innerHTML = null;
         modalWindow.style.display = 'none';
+        showInscription();
     }
 });
 
+function showInscription() {
+    const flatMoreDescription = document.querySelectorAll('.hidden-flat-more-description');
+    for (let i = 0; i < flatMoreDescription.length; i++) {
+        flatMoreDescription[i].classList = 'flat-more-description';
+    }
+}
+
+function hideInscription() {
+    const flatMoreDescription = document.querySelectorAll('.flat-more-description');
+    for (let i = 0; i < flatMoreDescription.length; i++) {
+        flatMoreDescription[i].classList = 'hidden-flat-more-description';
+    }
+
+}
+
 function delContainers() {
-    adsContainer.innerHTML = '';
+    adsContainer.innerHTML = null;
 }
 
 function showDefaultFlats() {
