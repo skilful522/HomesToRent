@@ -12,7 +12,7 @@ search.addEventListener('keydown', (event) => {
         let searchInput = search.value;
 
         if (searchInput === '') {
-            searchInput = undefined;
+            searchInput = null;
         }
         createScript(searchInput);
         delContainers();
@@ -28,7 +28,8 @@ document.addEventListener('click', event => {
     if (flatMoreDescription) {
         if (event.target.innerText === flatMoreDescription.innerText) {
             const infoContainer = event.target.parentNode;
-
+            const flatContainer = infoContainer.parentNode;
+            console.log(flatContainer);
             floatFullInfo.innerHTML = infoContainer.parentNode.innerHTML;
             modalWindow.style.display = 'block';
         } else if (event.target === favoritesListButton) {
@@ -100,7 +101,7 @@ function setInfo(flatTitles, flatProperties, flatSummary, flatsPrices, flatsPhot
     const flatMoreDescription = document.querySelectorAll('.flat-more-description');
     const flatPriceContainer = document.querySelectorAll('.flat-price-container');
     const img = document.querySelectorAll('.flatImg');
-    
+
     if (img.length !== 0) {
         for (let i = 0; i < 5; i++) {
             img[i].src = flatsPhotos[i];
