@@ -1,0 +1,143 @@
+* {
+    padding: 0;
+    margin: 0;
+    font-family: "Comic Sans MS";
+}
+
+h1 {
+    font-size: 3em;
+    font-family: "Magic Wix Script RUS";
+    text-align: center;
+}
+
+header {
+    background: 1px blanchedalmond;
+}
+
+img {
+    width: 100%;
+}
+
+#search-container {
+    justify-content: center;
+    display: flex;
+    border-top: 5px solid rosybrown;
+}
+
+#searchInput {
+    margin: 5px;
+    font-size: 1.2em;
+}
+
+#favorites-lists-button-container {
+    justify-content: center;
+    margin: 5px;
+    display: flex;
+}
+
+#favoritesListButton {
+    font-size: 1.5em;
+    padding: 3px;
+    color: black;
+    background: yellow;
+    outline-color: black;
+    cursor: pointer;
+    border: none;
+}
+
+#background {
+    width: 60%;
+    margin: 0 auto;
+    background: seashell;
+}
+
+.flat-container {
+    margin: 20px 0;
+    display: flex;
+    border: 2px outset rosybrown;
+}
+
+.photo-container {
+    width: 45%;
+}
+
+.info-container {
+    display: block;
+    justify-content: space-between;
+    width: 35%;
+}
+
+.flat-title-container, .flat-property-container, .flat-summary-container, .flat-more-description {
+    font-size: 1em;
+
+    padding: 8px;
+}
+.flat-more-description {
+    cursor: pointer;
+    color: cornflowerblue;
+}
+
+.rent-container {
+    justify-content: space-between;
+}
+
+.flat-price-container {
+    background: brown;
+    text-align: center;
+    color: snow;
+}
+
+.favoritesButton {
+    font-size: 1.3em;
+    color: black;
+    background: yellow;
+    outline-color: black;
+    cursor: pointer;
+    border: none;
+    margin-bottom: 50%;
+    width: 162px;
+}
+
+.search-warning {
+    text-align: center;
+    color: red;
+    font-size: 1.5em;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.modal-content {
+    background: snow;
+    display: flex;
+    justify-content: space-between;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid darkgrey;
+    width: 80%;
+}
+
+.closeButton {
+    color: red;
+    padding: 0;
+    border: none;
+    font-size: 1.5em;
+    background: none;
+    cursor: pointer;
+    outline: none;
+}
+
+#flat-full-info {
+    display: flex;
+}
+
+
