@@ -25,12 +25,15 @@ document.addEventListener('click', event => {
     const flatMoreDescription = document.querySelector('.flat-more-description');
     const favoritesListButton = document.querySelector('#favoritesListButton');
 
-    if (event.target.innerText === flatMoreDescription.innerText){
-        const infoContainer = event.target.parentNode;
-        floatFullInfo.innerHTML = infoContainer.parentNode.innerHTML;
-        modalWindow.style.display = 'block';
-    } else if (event.target === favoritesListButton) {
-        modalWindow.style.display = 'block';
+    if (flatMoreDescription) {
+        if (event.target.innerText === flatMoreDescription.innerText) {
+            const infoContainer = event.target.parentNode;
+
+            floatFullInfo.innerHTML = infoContainer.parentNode.innerHTML;
+            modalWindow.style.display = 'block';
+        } else if (event.target === favoritesListButton) {
+            modalWindow.style.display = 'block';
+        }
     }
 });
 
@@ -54,8 +57,6 @@ function showDefaultFlats() {
 }
 
 function getData(data) {
-
-
     checker.location = data.response['application_response_text'];
     if (checker.location !== 'unknown location') {
         const flatsArr = data.response.listings;
@@ -99,6 +100,7 @@ function setInfo(flatTitles, flatProperties, flatSummary, flatsPrices, flatsPhot
     const flatMoreDescription = document.querySelectorAll('.flat-more-description');
     const flatPriceContainer = document.querySelectorAll('.flat-price-container');
     const img = document.querySelectorAll('.flatImg');
+    
     if (img.length !== 0) {
         for (let i = 0; i < 5; i++) {
             img[i].src = flatsPhotos[i];
