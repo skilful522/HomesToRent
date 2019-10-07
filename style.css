@@ -141,8 +141,7 @@ img {
     outline: none;
 }
 
-#flat-full-info {
+.favorite-flat-container {
     display: flex;
 }
-
 
