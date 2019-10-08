@@ -3,17 +3,23 @@ const adsContainer = document.querySelector('#ads-container');
 const checker = {};
 const modalWindow = document.querySelector('#modalWindow');
 const closeBtn = document.querySelector('.closeButton');
+const loaderContainer = document.querySelector("#loader-container");
 const flats = [];
+const favoriteFlats = [];
 
 showDefaultFlats();
 
+window.addEventListener('load', () => {
+    loaderContainer.style.display = 'none';
+    adsContainer.style.display = 'block';
+});
+
 search.addEventListener('keydown', (event) => {
     if (event.keyCode === 13) {
-
         let searchInput = search.value;
-        console.log(searchInput);
+
         if (searchInput === '') {
-            searchInput = undefined;
+            searchInput = null;
         }
         createScript(searchInput);
         delContainers();
@@ -22,28 +28,62 @@ search.addEventListener('keydown', (event) => {
 });
 
 document.addEventListener('click', event => {
-    const floatFullInfo = document.querySelector('#flat-full-info');
+    const flatFullInfo = document.querySelector('#flat-full-info');
     const flatMoreDescription = document.querySelector('.flat-more-description');
     const favoritesListButton = document.querySelector('#favoritesListButton');
+    const favoritesButton = document.querySelectorAll('.favoritesButton');
 
     if (flatMoreDescription) {
         if (event.target.innerText === flatMoreDescription.innerText) {
             const infoContainer = event.target.parentNode;
+            const flatContainer = infoContainer.parentNode;
+            const duplicateFlatContainer = flatContainer.cloneNode(flatContainer);
+            const duplicateInfoContainer = duplicateFlatContainer.childNodes[1];
+            const duplicateRentContainer = duplicateFlatContainer.childNodes[2];
+            const duplicateFavoriteButton = duplicateRentContainer.childNodes[1];
+            const duplicateFlatMoreDescription = duplicateInfoContainer.childNodes[3];
 
-            hideInscription();
-            floatFullInfo.innerHTML = infoContainer.parentNode.innerHTML;
+            duplicateInfoContainer.removeChild(duplicateFlatMoreDescription);
+            duplicateRentContainer.removeChild(duplicateFavoriteButton);
+            flatFullInfo.appendChild(duplicateFlatContainer);
+            flatFullInfo.style.display = 'flex';
             modalWindow.style.display = 'block';
         } else if (event.target === favoritesListButton) {
+            flatFullInfo.style.display = 'block';
+            for (let i = 0; i < favoriteFlats.length; i++) {
+                const flatContainer = createContainer('favorite-flat-container', 'div');
+
+                flatContainer.innerHTML = favoriteFlats[i].innerHTML;
+
+                const rentContainer = flatContainer.children[2];
+                const favoriteButton = rentContainer.children[1];
+
+                favoriteButton.style.display = 'none';
+                flatFullInfo.appendChild(flatContainer);
+            }
             modalWindow.style.display = 'block';
         }
     }
+
+    for (let i = 0; i < favoritesButton.length; i++) {
+        if (event.target === favoritesButton[i]) {
+            const rentContainer = favoritesButton[i].parentNode;
+            const flatContainer = rentContainer.parentNode;
+
+            favoritesButton[i].disabled = true;
+            favoritesButton[i].innerText = '\u2606AddedToFav\u2606';
+            flatContainer.style.border = '3px solid gold';
+            favoriteFlats.push(flatContainer);
+        }
+    }
+
 });
 
 closeBtn.addEventListener('click', () => {
-    const floatFullInfo = document.querySelector('#flat-full-info');
-    floatFullInfo.innerHTML = null;
+    const flatFullInfo = document.querySelector('#flat-full-info');
+
+    flatFullInfo.innerHTML = null;
     modalWindow.style.display = 'none';
-    showInscription();
 });
 
 document.addEventListener('click', (event) => {
@@ -52,24 +92,8 @@ document.addEventListener('click', (event) => {
     if (event.target === modalWindow) {
         floatFullInfo.innerHTML = null;
         modalWindow.style.display = 'none';
-        showInscription();
     }
 });
-
-function showInscription() {
-    const flatMoreDescription = document.querySelectorAll('.hidden-flat-more-description');
-    for (let i = 0; i < flatMoreDescription.length; i++) {
-        flatMoreDescription[i].classList = 'flat-more-description';
-    }
-}
-
-function hideInscription() {
-    const flatMoreDescription = document.querySelectorAll('.flat-more-description');
-    for (let i = 0; i < flatMoreDescription.length; i++) {
-        flatMoreDescription[i].classList = 'hidden-flat-more-description';
-    }
-
-}
 
 function delContainers() {
     adsContainer.innerHTML = null;
@@ -89,15 +113,17 @@ function getData(data) {
         const flatsSummaries = [];
         const flatsProperties = makeFlatProperty(data);
         const flatsPrices = makePriceType(flatsArr);
-        const flat = {
-            photo: '',
-            title: '',
-            summary: '',
-            properties: '',
-            price: ''
-        };
 
         for (let i = 0; i < flatsArr.length; i++) {
+            const flat = {
+                photo: '',
+                title: '',
+                summary: '',
+                properties: '',
+                price: '',
+                id: ''
+            };
+
             flatsPhotos.push(flatsArr[i]['img_url']);
             flatsTitles.push(flatsArr[i].title);
             flatsSummaries.push(flatsArr[i].summary);
@@ -106,7 +132,9 @@ function getData(data) {
             flat.photo = flatsArr[i]['img_url'];
             flat.title = flatsArr[i].title;
             flat.summary = flatsArr[i].summary;
+            flat.properties = flatsProperties[i];
             flat.price = flatsArr[i]['price_formatted'];
+            flat.id = i;
             flats.push(flat);
         }
 
@@ -127,6 +155,10 @@ function setInfo(flatTitles, flatProperties, flatSummary, flatsPrices, flatsPhot
 
     if (img.length !== 0) {
         for (let i = 0; i < 5; i++) {
+            img[0].addEventListener('load', () => {
+                loaderContainer.style.display = 'none';
+                adsContainer.style.display = 'block';
+            });
             img[i].src = flatsPhotos[i];
             flatTitleContainers[i].innerText = flatTitles[i];
             flatPropertyContainers[i].innerHTML = flatProperties[i];
@@ -180,12 +212,36 @@ function makeFlatProperty(data) {
 
 function createScript(searchInput = 'London') {
     const script = document.createElement('script');
-    const url = 'https://api.nestoria.co.uk/api?encoding=json&pretty=1&action=search_listings&country=uk&listing_type=rent&place_name=';
-
+    const url = constructQueryParams(searchInput);
     script.type = 'text/javascript';
-    script.src = url + searchInput + '&callback=getData';
+    script.src = url;
+    loaderContainer.style.display = 'flex';
+    adsContainer.style.display = 'none';
     document.body.appendChild(script);
     script.parentNode.removeChild(script);
+}
+
+function constructQueryParams(searchInput, page = 1) {
+    const a = document.createElement('a');
+    const url = 'https://api.nestoria.co.uk/api?';
+
+    a.href = url;
+
+    let params = new URLSearchParams(a.search);
+
+    params.append('encoding', 'json');
+    params.append('pretty', '1');
+    params.append('action', 'search_listings');
+    params.append('country', 'uk');
+    params.append('listing_type', 'rent');
+    params.append('page', `${page}`);
+    if (searchInput === null) {
+        searchInput = 'London';
+    }
+    params.append('place_name', searchInput);
+    params.append('callback', 'getData');
+
+    return url + params;
 }
 
 function createContainer(className, tagName) {
@@ -207,6 +263,8 @@ function createSearchWarning() {
     const warning = createContainer('search-warning', 'div');
 
     warning.innerText = 'Sorry, this location doesn\'t exist. \nTry again';
+    adsContainer.style.display = 'block';
+    loaderContainer.style.display = 'none';
     adsContainer.appendChild(warning);
 }
 
