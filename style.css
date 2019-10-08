@@ -74,7 +74,12 @@ img {
 }
 .flat-more-description {
     cursor: pointer;
+    visibility: visible;
     color: cornflowerblue;
+}
+
+.hidden-flat-more-description {
+    visibility: hidden;
 }
 
 .rent-container {
@@ -113,7 +118,7 @@ img {
     height: 100%;
     width: 100%;
     overflow: auto;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .modal-content {
@@ -136,8 +141,31 @@ img {
     outline: none;
 }
 
-#flat-full-info {
+.favorite-flat-container {
     display: flex;
 }
 
+#loader-container {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+#loader {
+    border: 16px solid rosybrown;
+    border-top: 16px solid brown;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#hide-loader{
+    display:none;
+}
 
