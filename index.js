@@ -3,10 +3,16 @@ const adsContainer = document.querySelector('#ads-container');
 const checker = {};
 const modalWindow = document.querySelector('#modalWindow');
 const closeBtn = document.querySelector('.closeButton');
+const loaderContainer = document.querySelector("#loader-container");
 const flats = [];
 const favoriteFlats = [];
 
 showDefaultFlats();
+
+window.addEventListener('load', () => {
+    loaderContainer.style.display = 'none';
+    adsContainer.style.display = 'block';
+});
 
 search.addEventListener('keydown', (event) => {
     if (event.keyCode === 13) {
@@ -148,7 +154,11 @@ function setInfo(flatTitles, flatProperties, flatSummary, flatsPrices, flatsPhot
     const img = document.querySelectorAll('.flatImg');
 
     if (img.length !== 0) {
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 5; i++) {
+            img[0].addEventListener('load', () => {
+                loaderContainer.style.display = 'none';
+                adsContainer.style.display = 'block';
+            });
             img[i].src = flatsPhotos[i];
             flatTitleContainers[i].innerText = flatTitles[i];
             flatPropertyContainers[i].innerHTML = flatProperties[i];
@@ -203,9 +213,10 @@ function makeFlatProperty(data) {
 function createScript(searchInput = 'London') {
     const script = document.createElement('script');
     const url = constructQueryParams(searchInput);
-
     script.type = 'text/javascript';
     script.src = url;
+    loaderContainer.style.display = 'flex';
+    adsContainer.style.display = 'none';
     document.body.appendChild(script);
     script.parentNode.removeChild(script);
 }
@@ -215,7 +226,7 @@ function constructQueryParams(searchInput, page = 1) {
     const url = 'https://api.nestoria.co.uk/api?';
 
     a.href = url;
-    
+
     let params = new URLSearchParams(a.search);
 
     params.append('encoding', 'json');
@@ -252,6 +263,8 @@ function createSearchWarning() {
     const warning = createContainer('search-warning', 'div');
 
     warning.innerText = 'Sorry, this location doesn\'t exist. \nTry again';
+    adsContainer.style.display = 'block';
+    loaderContainer.style.display = 'none';
     adsContainer.appendChild(warning);
 }
 
@@ -286,7 +299,7 @@ function addElementsIntoContainer() {
 }
 
 function addContainer() {
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 5; i++) {
         const flatContainer = addElementsIntoContainer();
 
         flatContainer.id = i;
