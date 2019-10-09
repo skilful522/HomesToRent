@@ -51,15 +51,27 @@ document.addEventListener('click', event => {
         } else if (event.target === favoritesListButton) {
             flatFullInfo.style.display = 'block';
             for (let i = 0; i < favoriteFlats.length; i++) {
-                const flatContainer = createContainer('favorite-flat-container', 'div');
+                const favoriteFlatContainer = createContainer('favorite-flat-container', 'div');
+                const removeButtonContainer = createContainer('remove-button-container', 'div');
+                const removeButton = createButton('removeButton','✖');
 
-                flatContainer.innerHTML = favoriteFlats[i].innerHTML;
+                const favoriteFlat = createContainer('favorite-flat', 'div');
 
-                const rentContainer = flatContainer.children[2];
+                favoriteFlat.innerHTML = favoriteFlats[i].innerHTML;
+
+                const rentContainer = favoriteFlat.children[2];
                 const favoriteButton = rentContainer.children[1];
+                const infoContainer = favoriteFlat.children[1];
+                const flatMoreDescription = infoContainer.children[3];
+                console.log(infoContainer);
+                console.log(flatMoreDescription);
 
                 favoriteButton.style.display = 'none';
-                flatFullInfo.appendChild(flatContainer);
+                flatMoreDescription.style.display = 'none';
+                removeButtonContainer.appendChild(removeButton);
+                favoriteFlatContainer.appendChild(favoriteFlat);
+                favoriteFlatContainer.appendChild(removeButtonContainer);
+                flatFullInfo.appendChild(favoriteFlatContainer);
             }
             modalWindow.style.display = 'block';
         }
@@ -93,6 +105,20 @@ document.addEventListener('click', (event) => {
         floatFullInfo.innerHTML = null;
         modalWindow.style.display = 'none';
     }
+});
+
+modalWindow.addEventListener('click', (event) => {
+    const removeButton = document.querySelectorAll('.removeButton');
+
+    for (let i = 0; i < removeButton.length; i++) {
+        if (event.target === removeButton[i]) {
+            const removeButtonContainer = removeButton[i].parentNode;
+            const favoriteFlatContainer = removeButtonContainer.parentNode;
+
+            favoriteFlatContainer.parentNode.removeChild(favoriteFlatContainer);
+        }
+    }
+
 });
 
 function delContainers() {
