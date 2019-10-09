@@ -6,6 +6,7 @@ const closeBtn = document.querySelector('.closeButton');
 const loaderContainer = document.querySelector("#loader-container");
 const flats = [];
 const favoriteFlats = [];
+const pagination = document.querySelector("#pagination");
 
 showDefaultFlats();
 
@@ -51,15 +52,24 @@ document.addEventListener('click', event => {
         } else if (event.target === favoritesListButton) {
             flatFullInfo.style.display = 'block';
             for (let i = 0; i < favoriteFlats.length; i++) {
-                const flatContainer = createContainer('favorite-flat-container', 'div');
+                const favoriteFlatContainer = createContainer('favorite-flat-container', 'div');
+                const removeButtonContainer = createContainer('remove-button-container', 'div');
+                const removeButton = createButton('removeButton','✖');
+                const favoriteFlat = createContainer('favorite-flat', 'div');
 
-                flatContainer.innerHTML = favoriteFlats[i].innerHTML;
+                favoriteFlat.innerHTML = favoriteFlats[i].innerHTML;
 
-                const rentContainer = flatContainer.children[2];
+                const rentContainer = favoriteFlat.children[2];
                 const favoriteButton = rentContainer.children[1];
+                const infoContainer = favoriteFlat.children[1];
+                const flatMoreDescription = infoContainer.children[3];
 
                 favoriteButton.style.display = 'none';
-                flatFullInfo.appendChild(flatContainer);
+                flatMoreDescription.style.display = 'none';
+                removeButtonContainer.appendChild(removeButton);
+                favoriteFlatContainer.appendChild(favoriteFlat);
+                favoriteFlatContainer.appendChild(removeButtonContainer);
+                flatFullInfo.appendChild(favoriteFlatContainer);
             }
             modalWindow.style.display = 'block';
         }
@@ -95,12 +105,27 @@ document.addEventListener('click', (event) => {
     }
 });
 
+modalWindow.addEventListener('click', (event) => {
+    const removeButton = document.querySelectorAll('.removeButton');
+
+    for (let i = 0; i < removeButton.length; i++) {
+        if (event.target === removeButton[i]) {
+            const removeButtonContainer = removeButton[i].parentNode;
+            const favoriteFlatContainer = removeButtonContainer.parentNode;
+
+            favoriteFlatContainer.parentNode.removeChild(favoriteFlatContainer);
+        }
+    }
+
+});
+
 function delContainers() {
     adsContainer.innerHTML = null;
 }
 
 function showDefaultFlats() {
     createScript();
+    createPage();
     addContainer();
 }
 
@@ -213,12 +238,20 @@ function makeFlatProperty(data) {
 function createScript(searchInput = 'London') {
     const script = document.createElement('script');
     const url = constructQueryParams(searchInput);
+
     script.type = 'text/javascript';
     script.src = url;
     loaderContainer.style.display = 'flex';
     adsContainer.style.display = 'none';
     document.body.appendChild(script);
     script.parentNode.removeChild(script);
+}
+
+function createPage(innerText) {
+    const page = createContainer('page', 'div');
+
+    page.innerText = innerText;
+    return page;
 }
 
 function constructQueryParams(searchInput, page = 1) {

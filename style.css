@@ -131,18 +131,30 @@ img {
     width: 80%;
 }
 
-.closeButton {
-    color: red;
+.closeButton, .removeButton {
+    color: black;
     padding: 0;
     border: none;
-    font-size: 1.5em;
+    font-size: 2em;
     background: none;
     cursor: pointer;
     outline: none;
 }
 
+.removeButton {
+    color: red;
+    font-size: 1.5em;
+}
+
+.favorite-flat {
+    width: 100%;
+    display: flex;
+}
 .favorite-flat-container {
     display: flex;
+    margin-right: 50px;
+    border-right: 5px solid rosybrown;
+    border-bottom: 5px solid rosybrown;
 }
 
 #loader-container {
