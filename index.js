@@ -54,7 +54,6 @@ document.addEventListener('click', event => {
                 const favoriteFlatContainer = createContainer('favorite-flat-container', 'div');
                 const removeButtonContainer = createContainer('remove-button-container', 'div');
                 const removeButton = createButton('removeButton','✖');
-
                 const favoriteFlat = createContainer('favorite-flat', 'div');
 
                 favoriteFlat.innerHTML = favoriteFlats[i].innerHTML;
@@ -63,8 +62,6 @@ document.addEventListener('click', event => {
                 const favoriteButton = rentContainer.children[1];
                 const infoContainer = favoriteFlat.children[1];
                 const flatMoreDescription = infoContainer.children[3];
-                console.log(infoContainer);
-                console.log(flatMoreDescription);
 
                 favoriteButton.style.display = 'none';
                 flatMoreDescription.style.display = 'none';
