@@ -146,16 +146,14 @@ img {
     font-size: 1.5em;
 }
 
-.remove-button-container {
-    border-right: 5px solid rosybrown;
-}
-
 .favorite-flat {
+    width: 100%;
     display: flex;
 }
 .favorite-flat-container {
     display: flex;
     margin-right: 50px;
+    border-right: 5px solid rosybrown;
     border-bottom: 5px solid rosybrown;
 }
 

@@ -6,6 +6,7 @@ const closeBtn = document.querySelector('.closeButton');
 const loaderContainer = document.querySelector("#loader-container");
 const flats = [];
 const favoriteFlats = [];
+const pagination = document.querySelector("#pagination");
 
 showDefaultFlats();
 
@@ -124,10 +125,12 @@ function delContainers() {
 
 function showDefaultFlats() {
     createScript();
+    createPage();
     addContainer();
 }
 
 function getData(data) {
+    console.log(data);
     checker.location = data.response['application_response_text'];
     if (checker.location !== 'unknown location') {
         const flatsArr = data.response.listings;
@@ -236,12 +239,19 @@ function makeFlatProperty(data) {
 function createScript(searchInput = 'London') {
     const script = document.createElement('script');
     const url = constructQueryParams(searchInput);
+    console.log(url);
     script.type = 'text/javascript';
     script.src = url;
     loaderContainer.style.display = 'flex';
     adsContainer.style.display = 'none';
     document.body.appendChild(script);
     script.parentNode.removeChild(script);
+}
+
+function createPage(innerText) {
+    const page = createContainer('page', 'div');
+    page.innerText = innerText;
+    return page;
 }
 
 function constructQueryParams(searchInput, page = 1) {
@@ -256,6 +266,7 @@ function constructQueryParams(searchInput, page = 1) {
     params.append('pretty', '1');
     params.append('action', 'search_listings');
     params.append('country', 'uk');
+   // params.append('num_res', 5);
     params.append('listing_type', 'rent');
     params.append('page', `${page}`);
     if (searchInput === null) {
