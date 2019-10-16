@@ -4,7 +4,6 @@ const checker = {};
 const modalWindow = document.querySelector('#modalWindow');
 const closeBtn = document.querySelector('.closeButton');
 const loaderContainer = document.querySelector("#loader-container");
-const flats = [];
 const favoriteFlats = [];
 const cache = new Map();
 const response = {};
@@ -24,29 +23,72 @@ setCurrentPage();
 
 backButton.addEventListener('click', () => {
     const page = document.querySelectorAll('.page');
+    const activePage = document.querySelector('.activePage');
+
+    if (activePage != page[2]) {
+
+        if (activePage) {
+            activePage.classList.remove('activePage');
+            if (activePage.innerText == response.totalPage - 1) {
+                page[2].classList.add('activePage');
+            } else {
+                page[3].classList.add('activePage');
+            }
+
+        }
+    }
 
     createScript(scriptParams.city, --scriptParams.page);
     setCurrentPage();
+
     if (scriptParams.page < page[2].innerText) {
-        for (let i = 0; i < page.length; i++) {
-            if (page[2].innerText !== '3') {
+        if (page[2].innerText !== '3') {
+            for (let i = 0; i < page.length; i++) {
                 page[i].innerText = +page[i].innerText - 1;
             }
+        } else if (activePage.innerText === '3') {
+            activePage.classList.remove('activePage');
+            page[1].classList.add('activePage');
+        } else if (activePage.innerText === '2') {
+            activePage.classList.remove('activePage');
+            page[0].classList.add('activePage');
         }
+
     }
 });
 
 nextButton.addEventListener('click', () => {
     const page = document.querySelectorAll('.page');
+    const activePage = document.querySelector('.activePage');
+
+    if (activePage != page[2]) {
+
+        if (activePage) {
+            activePage.classList.remove('activePage');
+            if (scriptParams.page != response.totalPage - 1) {
+                page[scriptParams.page].classList.add('activePage');
+            } else {
+                page[4].classList.add('activePage');
+            }
+
+        }
+    }
 
     createScript(scriptParams.city, ++scriptParams.page);
     setCurrentPage();
+
     if (scriptParams.page > page[2].innerText) {
-
-        for (let i = 0; i < page.length; i++) {
-            page[i].innerText = +page[i].innerText + 1;
+        if (page[2].innerText != response.totalPage - 2) {
+            for (let i = 0; i < page.length; i++) {
+                page[i].innerText = +page[i].innerText + 1;
+            }
+        } else if (activePage.innerText == response.totalPage - 2) {
+            activePage.classList.remove('activePage');
+            page[3].classList.add('activePage');
+        } else if (activePage.innerText == response.totalPage - 1) {
+            activePage.classList.remove('activePage');
+            page[4].classList.add('activePage');
         }
-
     }
 
 });
@@ -75,16 +117,55 @@ search.addEventListener('keydown', (event) => {
 
 pagination.addEventListener('click', (event) => {
     const page = document.querySelectorAll('.page');
+    const activePage = document.querySelector('.activePage');
     let cacheKey = adsContainer.firstChild.id;
 
     if (event.target.className === 'page') {
+
+        if (activePage) {
+            activePage.classList.remove('activePage');
+        }
+        switch (event.target) {
+            case page[0]:
+                if (event.target.innerText != 1) {
+                    page[2].classList.add('activePage');
+                } else {
+                    event.target.classList.add('activePage');
+                }
+                break;
+            case page[1]:
+                if (event.target.innerText != 2) {
+                    page[2].classList.add('activePage');
+                } else {
+                    event.target.classList.add('activePage');
+                }
+                break;
+            case page[3]:
+                if (event.target.innerText != response.totalPage - 1) {
+                    page[2].classList.add('activePage');
+                } else {
+                    event.target.classList.add('activePage');
+                }
+                break;
+            case page[4]:
+                if (event.target.innerText != response.totalPage) {
+                    page[2].classList.add('activePage');
+                } else {
+                    event.target.classList.add('activePage');
+                }
+                break;
+            default:
+                event.target.classList.add('activePage');
+        }
+
         scriptParams.page = event.target.innerText;
         createScript(scriptParams.city, scriptParams.page);
 
     }
     makeClickPagination(page);
     setCurrentPage();
-    if (scriptParams.page == response.totalPage || scriptParams.page == response.totalPage - 1) {
+
+    if (scriptParams.page == response.totalPage) {
         nextButton.style.display = 'none';
     } else {
         nextButton.style.display = 'block';
@@ -99,58 +180,6 @@ pagination.addEventListener('click', (event) => {
     cache.set(cacheKey, adsContainer.innerHTML);
 
 });
-
-function makeClickPagination(page) {
-
-    if (event.target === page[3]) {
-        if (event.target.innerText != response.totalPage - 1) {
-            page[2].innerText = event.target.innerText;
-            for (let i = 0; i < page.length; i++) {
-                if (page[i] !== page[2]) {
-                    page[i].innerText = +page[i].innerText + 1;
-                }
-            }
-        } else if (event.target.innerText == response.totalPage - 2) {
-            for (let i = 0; i < page.length; i++) {
-                page[i].innerText = +page[i].innerText + 1;
-            }
-        }
-    } else if (event.target === page[4]) {
-        if (event.target.innerText == response.totalPage - 1) {
-            for (let i = 0; i < page.length; i++) {
-                page[i].innerText = +page[i].innerText + 1;
-            }
-        } else if (event.target.innerText != response.totalPage) {
-            page[2].innerText = event.target.innerText;
-            for (let i = 0; i < page.length; i++) {
-                if (page[i] !== page[2]) {
-                    page[i].innerText = +page[i].innerText + 2;
-                }
-            }
-        }
-    } else if (event.target === page[0] && event.target.innerText != 1 && event.target.innerText != 2 ||
-        event.target === page[1] && event.target.innerText != 2) {
-        page[2].innerText = event.target.innerText;
-        for (let i = 0; i < page.length; i++) {
-            if (event.target === page[1]) {
-                if (page[i] !== page[2]) {
-                    page[i].innerText = +page[i].innerText - 1;
-                }
-            }
-            if (event.target === page[0]) {
-                if (page[i] !== page[2]) {
-                    page[i].innerText = +page[i].innerText - 2;
-                }
-            }
-        }
-    } else if (event.target === page[0] && event.target.innerText == 2) {
-        for (let i = 0; i < page.length; i++) {
-            if (event.target === page[0]) {
-                page[i].innerText = +page[i].innerText - 1;
-            }
-        }
-    }
-}
 
 document.addEventListener('click', event => {
     const flatFullInfo = document.querySelector('#flat-full-info');
@@ -244,6 +273,58 @@ modalWindow.addEventListener('click', (event) => {
 
 });
 
+function makeClickPagination(page) {
+    if (event.target === page[3]) {
+        if (event.target.innerText != response.totalPage - 1) {
+            page[2].innerText = event.target.innerText;
+
+            for (let i = 0; i < page.length; i++) {
+                if (page[i] !== page[2]) {
+                    page[i].innerText = +page[i].innerText + 1;
+                }
+            }
+        } else if (event.target.innerText == response.totalPage - 2) {
+            for (let i = 0; i < page.length; i++) {
+                page[i].innerText = +page[i].innerText + 1;
+            }
+        }
+    } else if (event.target === page[4]) {
+        if (event.target.innerText == response.totalPage - 1) {
+            for (let i = 0; i < page.length; i++) {
+                page[i].innerText = +page[i].innerText + 1;
+            }
+        } else if (event.target.innerText != response.totalPage) {
+            page[2].innerText = event.target.innerText;
+            for (let i = 0; i < page.length; i++) {
+                if (page[i] !== page[2]) {
+                    page[i].innerText = +page[i].innerText + 2;
+                }
+            }
+        }
+    } else if (event.target === page[0] && event.target.innerText != 1 && event.target.innerText != 2 ||
+        event.target === page[1] && event.target.innerText != 2) {
+        page[2].innerText = event.target.innerText;
+        for (let i = 0; i < page.length; i++) {
+            if (event.target === page[1]) {
+                if (page[i] !== page[2]) {
+                    page[i].innerText = +page[i].innerText - 1;
+                }
+            }
+            if (event.target === page[0]) {
+                if (page[i] !== page[2]) {
+                    page[i].innerText = +page[i].innerText - 2;
+                }
+            }
+        }
+    } else if (event.target === page[0] && event.target.innerText == 2) {
+        for (let i = 0; i < page.length; i++) {
+            if (event.target === page[0]) {
+                page[i].innerText = +page[i].innerText - 1;
+            }
+        }
+    }
+}
+
 function setTotalPage() {
     const totalPage = document.querySelector('#total-page');
 
@@ -290,27 +371,12 @@ function getData(data) {
         let check = false;
 
         for (let i = 0; i < flatsArr.length; i++) {
-            const flat = {
-                photo: '',
-                title: '',
-                summary: '',
-                properties: '',
-                price: '',
-                id: ''
-            };
 
             flatsPhotos.push(flatsArr[i]['img_url']);
             flatsTitles.push(flatsArr[i].title);
             flatsSummaries.push(flatsArr[i].summary);
             flatsPrices.push(flatsArr[i]['price_formatted']);
 
-            flat.photo = flatsArr[i]['img_url'];
-            flat.title = flatsArr[i].title;
-            flat.summary = flatsArr[i].summary;
-            flat.properties = flatsProperties[i];
-            flat.price = flatsArr[i]['price_formatted'];
-            flat.id = i;
-            flats.push(flat);
         }
         delContainers();
         if (cache.size !== 0) {
@@ -325,8 +391,7 @@ function getData(data) {
             if (!check) {
                 addContainer(flatList.quantity.length);
             }
-        }
-        else {
+        } else {
             addContainer(flatList.quantity.length);
         }
         setInfo(flatsTitles, flatsProperties, flatsSummaries, flatsPrices, flatsPhotos);
@@ -334,6 +399,7 @@ function getData(data) {
         delContainers();
         createSearchWarning();
     }
+
 }
 
 function setInfo(flatTitles, flatProperties, flatSummary, flatsPrices, flatsPhotos) {
@@ -438,7 +504,7 @@ function constructQueryParams(city, page) {
     params.append('listing_type', 'rent');
     params.append('page', `${page}`);
     if (city === null) {
-        city = 'Boston';
+        city = 'York';
     }
     params.append('place_name', city);
     params.append('callback', 'getData');
@@ -504,7 +570,11 @@ function addPages() {
 
     for (let i = pageNumber; i <= 5; i++) {
         const page = createPage(i);
+
         page.id = i;
+        if (page.id === '1') {
+            page.className = 'page activePage';
+        }
         pagination.insertBefore(page, nextButton);
     }
 }

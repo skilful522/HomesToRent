@@ -194,7 +194,7 @@ img {
     font-size: 2em;
 }
 
-.page:hover {
+.page:hover, .activePage{
     background: yellow;
     color: snow;
 }
