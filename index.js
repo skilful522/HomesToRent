@@ -4,11 +4,92 @@ const checker = {};
 const modalWindow = document.querySelector('#modalWindow');
 const closeBtn = document.querySelector('.closeButton');
 const loaderContainer = document.querySelector("#loader-container");
-const flats = [];
 const favoriteFlats = [];
+const cache = new Map();
+const response = {};
+const scriptParams = {
+    city: 'York',
+    page: 1
+};
+const flatList = {};
 const pagination = document.querySelector("#pagination");
+const backButton = document.querySelector('#back-button');
+const nextButton = document.querySelector('#next-button');
+const MAXIMUM_PAGES = 100;
 
-showDefaultFlats();
+hideBackButton();
+createScript(scriptParams.city, scriptParams.page);
+addPages();
+
+backButton.addEventListener('click', () => {
+    const page = document.querySelectorAll('.page');
+    const activePage = document.querySelector('.activePage');
+
+    if (activePage != page[2]) {
+
+        if (activePage) {
+            activePage.classList.remove('activePage');
+            if (activePage.innerText == response.totalPage - 1) {
+                page[2].classList.add('activePage');
+            } else {
+                page[3].classList.add('activePage');
+            }
+
+        }
+    }
+
+    createScript(scriptParams.city, --scriptParams.page);
+
+    if (scriptParams.page < page[2].innerText) {
+        if (page[2].innerText !== '3') {
+            for (let i = 0; i < page.length; i++) {
+                page[i].innerText = +page[i].innerText - 1;
+            }
+        } else if (activePage.innerText === '3') {
+            activePage.classList.remove('activePage');
+            page[1].classList.add('activePage');
+        } else if (activePage.innerText === '2') {
+            activePage.classList.remove('activePage');
+            page[0].classList.add('activePage');
+        }
+
+    }
+});
+
+nextButton.addEventListener('click', () => {
+    const page = document.querySelectorAll('.page');
+    const activePage = document.querySelector('.activePage');
+
+    if (activePage != page[2]) {
+
+        if (activePage) {
+            activePage.classList.remove('activePage');
+            if (scriptParams.page != response.totalPage - 1) {
+                page[scriptParams.page].classList.add('activePage');
+            } else {
+                page[4].classList.add('activePage');
+            }
+
+        }
+    }
+
+    createScript(scriptParams.city, ++scriptParams.page);
+
+    if (scriptParams.page > page[2].innerText) {
+        if (page[2].innerText != response.totalPage - 2) {
+            for (let i = 0; i < page.length; i++) {
+                page[i].innerText = +page[i].innerText + 1;
+            }
+        } else if (activePage.innerText == response.totalPage - 2) {
+            activePage.classList.remove('activePage');
+            page[3].classList.add('activePage');
+        } else if (activePage.innerText == response.totalPage - 1) {
+            activePage.classList.remove('activePage');
+            page[4].classList.add('activePage');
+        }
+    }
+
+});
 
 window.addEventListener('load', () => {
     loaderContainer.style.display = 'none';
@@ -22,10 +103,79 @@ search.addEventListener('keydown', (event) => {
         if (searchInput === '') {
             searchInput = null;
         }
-        createScript(searchInput);
+        scriptParams.city = searchInput;
+        scriptParams.page = 1;
+        updatePagination();
+        hideBackButton();
+        createScript(scriptParams.city, scriptParams.page);
         delContainers();
-        addContainer();
+        addContainer(flatList.quantity.length);
     }
+});
+
+pagination.addEventListener('click', (event) => {
+    const page = document.querySelectorAll('.page');
+    const activePage = document.querySelector('.activePage');
+    let cacheKey = adsContainer.firstChild.id;
+
+    if (event.target.className === 'page') {
+
+        if (activePage) {
+            activePage.classList.remove('activePage');
+        }
+        switch (event.target) {
+            case page[0]:
+                if (event.target.innerText != 1) {
+                    page[2].classList.add('activePage');
+                } else {
+                    event.target.classList.add('activePage');
+                }
+                break;
+            case page[1]:
+                if (event.target.innerText != 2) {
+                    page[2].classList.add('activePage');
+                } else {
+                    event.target.classList.add('activePage');
+                }
+                break;
+            case page[3]:
+                if (event.target.innerText != response.totalPage - 1) {
+                    page[2].classList.add('activePage');
+                } else {
+                    event.target.classList.add('activePage');
+                }
+                break;
+            case page[4]:
+                if (event.target.innerText != response.totalPage) {
+                    page[2].classList.add('activePage');
+                } else {
+                    event.target.classList.add('activePage');
+                }
+                break;
+            default:
+                event.target.classList.add('activePage');
+        }
+
+        scriptParams.page = event.target.innerText;
+        createScript(scriptParams.city, scriptParams.page);
+
+    }
+    makeClickPagination(page);
+
+    if (scriptParams.page == response.totalPage) {
+        nextButton.style.display = 'none';
+    } else {
+        nextButton.style.display = 'block';
+    }
+
+    if (scriptParams.page != 1) {
+        backButton.style.display = 'flex';
+    } else if (scriptParams.page == 1) {
+        backButton.style.display = 'none';
+    }
+
+    cache.set(cacheKey, adsContainer.innerHTML);
+
 });
 
 document.addEventListener('click', event => {
@@ -54,7 +204,7 @@ document.addEventListener('click', event => {
             for (let i = 0; i < favoriteFlats.length; i++) {
                 const favoriteFlatContainer = createContainer('favorite-flat-container', 'div');
                 const removeButtonContainer = createContainer('remove-button-container', 'div');
-                const removeButton = createButton('removeButton','✖');
+                const removeButton = createButton('removeButton', '✖');
                 const favoriteFlat = createContainer('favorite-flat', 'div');
 
                 favoriteFlat.innerHTML = favoriteFlats[i].innerHTML;
@@ -83,6 +233,7 @@ document.addEventListener('click', event => {
             favoritesButton[i].disabled = true;
             favoritesButton[i].innerText = '\u2606AddedToFav\u2606';
             flatContainer.style.border = '3px solid gold';
+
             favoriteFlats.push(flatContainer);
         }
     }
@@ -119,55 +270,130 @@ modalWindow.addEventListener('click', (event) => {
 
 });
 
-function delContainers() {
-    adsContainer.innerHTML = null;
+function makeClickPagination(page) {
+    if (event.target === page[3]) {
+        if (event.target.innerText != response.totalPage - 1) {
+            page[2].innerText = event.target.innerText;
+
+            for (let i = 0; i < page.length; i++) {
+                if (page[i] !== page[2]) {
+                    page[i].innerText = +page[i].innerText + 1;
+                }
+            }
+        } else if (event.target.innerText == response.totalPage - 2) {
+            for (let i = 0; i < page.length; i++) {
+                page[i].innerText = +page[i].innerText + 1;
+            }
+        }
+    } else if (event.target === page[4]) {
+        if (event.target.innerText == response.totalPage - 1) {
+            for (let i = 0; i < page.length; i++) {
+                page[i].innerText = +page[i].innerText + 1;
+            }
+        } else if (event.target.innerText != response.totalPage) {
+            page[2].innerText = event.target.innerText;
+            for (let i = 0; i < page.length; i++) {
+                if (page[i] !== page[2]) {
+                    page[i].innerText = +page[i].innerText + 2;
+                }
+            }
+        }
+    } else if (event.target === page[0] && event.target.innerText != 1 && event.target.innerText != 2 ||
+        event.target === page[1] && event.target.innerText != 2) {
+        page[2].innerText = event.target.innerText;
+        for (let i = 0; i < page.length; i++) {
+            if (event.target === page[1]) {
+                if (page[i] !== page[2]) {
+                    page[i].innerText = +page[i].innerText - 1;
+                }
+            }
+            if (event.target === page[0]) {
+                if (page[i] !== page[2]) {
+                    page[i].innerText = +page[i].innerText - 2;
+                }
+            }
+        }
+    } else if (event.target === page[0] && event.target.innerText == 2) {
+        for (let i = 0; i < page.length; i++) {
+            if (event.target === page[0]) {
+                page[i].innerText = +page[i].innerText - 1;
+            }
+        }
+    }
 }
 
-function showDefaultFlats() {
-    createScript();
-    createPage();
-    addContainer();
+function setTotalPage() {
+    const totalPage = document.querySelector('#total-page');
+
+    totalPage.innerText = response.totalPage;
 }
+
+function hideBackButton() {
+    backButton.style.display = 'none';
+}
+
+function delContainers() {
+    adsContainer.innerHTML = '';
+}
+
+function updatePagination() {
+    const page = document.querySelectorAll('.page');
+
+    for (let i = 0; i < page.length; i++) {
+        page[i].innerText = i + 1;
+    }
+}
+
 
 function getData(data) {
+    response.totalPage = data.response['total_pages'];
+    if (response.totalPage > MAXIMUM_PAGES) {
+        response.totalPage = MAXIMUM_PAGES;
+    }
+    response.numberResults = data.request['num_res'];
     checker.location = data.response['application_response_text'];
+    setTotalPage();
     if (checker.location !== 'unknown location') {
+        response.page = data.request.page;
         const flatsArr = data.response.listings;
+        flatList.quantity = data.response.listings;
         const flatsPhotos = [];
         const flatsTitles = [];
         const flatsSummaries = [];
         const flatsProperties = makeFlatProperty(data);
         const flatsPrices = makePriceType(flatsArr);
+        let check = false;
 
         for (let i = 0; i < flatsArr.length; i++) {
-            const flat = {
-                photo: '',
-                title: '',
-                summary: '',
-                properties: '',
-                price: '',
-                id: ''
-            };
 
             flatsPhotos.push(flatsArr[i]['img_url']);
             flatsTitles.push(flatsArr[i].title);
             flatsSummaries.push(flatsArr[i].summary);
             flatsPrices.push(flatsArr[i]['price_formatted']);
 
-            flat.photo = flatsArr[i]['img_url'];
-            flat.title = flatsArr[i].title;
-            flat.summary = flatsArr[i].summary;
-            flat.properties = flatsProperties[i];
-            flat.price = flatsArr[i]['price_formatted'];
-            flat.id = i;
-            flats.push(flat);
         }
+        delContainers();
+        if (cache.size !== 0) {
+            const cacheIterator = cache[Symbol.iterator]();
 
+            for (let [key, value] of cacheIterator) {
+                if (scriptParams.page * 10 == key) {
+                    adsContainer.innerHTML = value;
+                    check = true;
+                }
+            }
+            if (!check) {
+                addContainer(flatList.quantity.length);
+            }
+        } else {
+            addContainer(flatList.quantity.length);
+        }
         setInfo(flatsTitles, flatsProperties, flatsSummaries, flatsPrices, flatsPhotos);
     } else {
         delContainers();
         createSearchWarning();
     }
+
 }
 
 function setInfo(flatTitles, flatProperties, flatSummary, flatsPrices, flatsPhotos) {
@@ -179,10 +405,11 @@ function setInfo(flatTitles, flatProperties, flatSummary, flatsPrices, flatsPhot
     const img = document.querySelectorAll('.flatImg');
 
     if (img.length !== 0) {
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < flatList.quantity.length; i++) {
             img[0].addEventListener('load', () => {
                 loaderContainer.style.display = 'none';
                 adsContainer.style.display = 'block';
+                pagination.style.display = 'flex';
             });
             img[i].src = flatsPhotos[i];
             flatTitleContainers[i].innerText = flatTitles[i];
@@ -235,16 +462,19 @@ function makeFlatProperty(data) {
 }
 
 
-function createScript(searchInput = 'London') {
+function createScript(city, page) {
     const script = document.createElement('script');
-    const url = constructQueryParams(searchInput);
+    const url = constructQueryParams(city, page);
+    const currentPage = document.querySelector('#current-page');
 
     script.type = 'text/javascript';
     script.src = url;
     loaderContainer.style.display = 'flex';
     adsContainer.style.display = 'none';
+    pagination.style.display = 'none';
     document.body.appendChild(script);
     script.parentNode.removeChild(script);
+    currentPage.innerText = scriptParams.page;
 }
 
 function createPage(innerText) {
@@ -254,7 +484,8 @@ function createPage(innerText) {
     return page;
 }
 
-function constructQueryParams(searchInput, page = 1) {
+
+function constructQueryParams(city, page) {
     const a = document.createElement('a');
     const url = 'https://api.nestoria.co.uk/api?';
 
@@ -268,12 +499,11 @@ function constructQueryParams(searchInput, page = 1) {
     params.append('country', 'uk');
     params.append('listing_type', 'rent');
     params.append('page', `${page}`);
-    if (searchInput === null) {
-        searchInput = 'London';
+    if (city === null) {
+        city = 'York';
     }
-    params.append('place_name', searchInput);
+    params.append('place_name', city);
     params.append('callback', 'getData');
-
     return url + params;
 }
 
@@ -331,11 +561,26 @@ function addElementsIntoContainer() {
 
 }
 
-function addContainer() {
-    for (let i = 0; i < 5; i++) {
-        const flatContainer = addElementsIntoContainer();
+function addPages() {
+    const pageNumber = scriptParams.page;
 
-        flatContainer.id = i;
+    for (let i = pageNumber; i <= 5; i++) {
+        const page = createPage(i);
+
+        page.id = i;
+        if (page.id === '1') {
+            page.className = 'page activePage';
+        }
+        pagination.insertBefore(page, nextButton);
+    }
+}
+
+function addContainer(flatList = 20) {
+    const pageNumber = scriptParams.page;
+    for (let i = 0; i < flatList; i++) {
+        const flatContainer = addElementsIntoContainer();
+        flatContainer.id = i + pageNumber * 10;
         adsContainer.appendChild(flatContainer);
     }
+
 }

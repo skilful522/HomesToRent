@@ -9,9 +9,17 @@
 <header>
     <h1>Houses To Rent</h1>
     <div id="search-container">
+        <div id="current-page-container">
+            Current Page:
+            <div id="current-page"></div>
+        </div>
         <input id="searchInput" type="text" placeholder="search">
         <div id="favorites-lists-button-container">
             <button id="favoritesListButton">FavList</button>
+        </div>
+        <div id="total-page-container">
+            Total Page:
+            <div id="total-page"></div>
         </div>
     </div>
 </header>
@@ -31,6 +39,9 @@
     </div>
 </div>
 </body>
-<div id="pagination"></div>
+<div id="pagination">
+    <button id="back-button">Back</button>
+    <button id="next-button">Next</button>
+</div>
 <script src="index.js"></script>
 </html>
