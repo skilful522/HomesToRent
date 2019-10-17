@@ -15,11 +15,11 @@ const flatList = {};
 const pagination = document.querySelector("#pagination");
 const backButton = document.querySelector('#back-button');
 const nextButton = document.querySelector('#next-button');
+const MAXIMUM_PAGES = 100;
 
 hideBackButton();
 createScript(scriptParams.city, scriptParams.page);
 addPages();
-setCurrentPage();
 
 backButton.addEventListener('click', () => {
     const page = document.querySelectorAll('.page');
@@ -39,7 +39,6 @@ backButton.addEventListener('click', () => {
     }
 
     createScript(scriptParams.city, --scriptParams.page);
-    setCurrentPage();
 
     if (scriptParams.page < page[2].innerText) {
         if (page[2].innerText !== '3') {
@@ -75,7 +74,6 @@ nextButton.addEventListener('click', () => {
     }
 
     createScript(scriptParams.city, ++scriptParams.page);
-    setCurrentPage();
 
     if (scriptParams.page > page[2].innerText) {
         if (page[2].innerText != response.totalPage - 2) {
@@ -163,7 +161,6 @@ pagination.addEventListener('click', (event) => {
 
     }
     makeClickPagination(page);
-    setCurrentPage();
 
     if (scriptParams.page == response.totalPage) {
         nextButton.style.display = 'none';
@@ -331,12 +328,6 @@ function setTotalPage() {
     totalPage.innerText = response.totalPage;
 }
 
-function setCurrentPage() {
-    const currentPage = document.querySelector('#current-page');
-
-    currentPage.innerText = scriptParams.page;
-}
-
 function hideBackButton() {
     backButton.style.display = 'none';
 }
@@ -351,16 +342,19 @@ function updatePagination() {
     for (let i = 0; i < page.length; i++) {
         page[i].innerText = i + 1;
     }
-    setCurrentPage();
 }
 
 
 function getData(data) {
     response.totalPage = data.response['total_pages'];
+    if (response.totalPage > MAXIMUM_PAGES) {
+        response.totalPage = MAXIMUM_PAGES;
+    }
     response.numberResults = data.request['num_res'];
     checker.location = data.response['application_response_text'];
     setTotalPage();
     if (checker.location !== 'unknown location') {
+        response.page = data.request.page;
         const flatsArr = data.response.listings;
         flatList.quantity = data.response.listings;
         const flatsPhotos = [];
@@ -471,6 +465,7 @@ function makeFlatProperty(data) {
 function createScript(city, page) {
     const script = document.createElement('script');
     const url = constructQueryParams(city, page);
+    const currentPage = document.querySelector('#current-page');
 
     script.type = 'text/javascript';
     script.src = url;
@@ -479,6 +474,7 @@ function createScript(city, page) {
     pagination.style.display = 'none';
     document.body.appendChild(script);
     script.parentNode.removeChild(script);
+    currentPage.innerText = scriptParams.page;
 }
 
 function createPage(innerText) {
@@ -581,7 +577,6 @@ function addPages() {
 
 function addContainer(flatList = 20) {
     const pageNumber = scriptParams.page;
-
     for (let i = 0; i < flatList; i++) {
         const flatContainer = addElementsIntoContainer();
         flatContainer.id = i + pageNumber * 10;
